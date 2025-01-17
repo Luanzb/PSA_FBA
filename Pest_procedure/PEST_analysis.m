@@ -1,10 +1,13 @@
 
-function PEST_analysis(PEST,resp)
+function PEST_analysis(PEST,resp,sub)
 
 
+  if sub.Staircase == 'V'
+       titulo = {'PEST - Vertical gabor'};
+  elseif sub.Staircase == 'H'
+      titulo = {'PEST - Horizontal gabor'};
+  end
 
-titulo = {'PEST - SOA for Saccade Condition'};
-%
 
 set(gca,'TickDir','out');
 ylim([0 1]);hold on;
@@ -20,7 +23,7 @@ plot(t(PEST.response == 0),PEST.x(PEST.response == 0),'ko', 'MarkerFaceColor','w
 
 yline(0.5,'--');
 xlabel('Trial',FontWeight='bold');
-ylabel('Contrast','FontWeight','bold');
+ylabel('Gabor Contrast','FontWeight','bold');
 
 format long
 txt = sprintf('Mean: %d',PEST.mean);
@@ -56,9 +59,9 @@ disp('     pHit      pFA      d-prime   p Corr    crit C    crit lnB');
 disp(SDM);
 
 if (pH - pF) >= .3
-    disp('Aceitar limiar. Baixo FA rate');
+    disp('Aceitar limiar. Baixo FA');
 else
-    disp('Rejeitar limiar. Alto FA rate');
+    disp('Rejeitar limiar. Alto FA');
 end
 
 

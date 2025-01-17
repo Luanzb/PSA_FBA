@@ -24,7 +24,7 @@ info.gray_idx = info.white_idx/2;
 
   if sub.Staircase == 'V'
        targ_ori = 1;
-  else
+  elseif sub.Staircase == 'H'
       targ_ori = 2;
   end
 

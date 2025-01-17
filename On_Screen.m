@@ -24,9 +24,9 @@ info.gray_idx = info.white_idx/2;
 block_counter = 0;
 
 if trl.feature_ses(sub.ses_num,1) == 1
-    ex_img = imread('D:/PSA_FBA/Images/target_VL.png');
+    ex_img = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/target_VL.png');
 else
-    ex_img = imread('D:/PSA_FBA/Images/target_HL.png');
+    ex_img = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/target_HL.png');
 end
 ex_tex = Screen('MakeTexture', win, ex_img); clear ex_img;
 

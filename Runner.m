@@ -1,10 +1,10 @@
 
 close all; clear; clc;
 
-git_path = 'D:/PSA_FBA';
+git_path = '/home/kaneda/Documents/GitHub/PSA_FBA';
 addpath(genpath(git_path));
 
-pc_path = 'D:/PSA_FBA/Subjects';
+pc_path = '/home/kaneda/Documents/GitHub/Subjects';
 addpath(genpath(pc_path));
 
 cd(git_path);

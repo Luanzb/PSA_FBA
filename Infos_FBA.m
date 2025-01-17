@@ -1,8 +1,8 @@
 
-git_path = 'D:/PSA_FBA';
+git_path = '/home/kaneda/Documents/GitHub/PSA_FBA';
 addpath(genpath(git_path));
 
-pc_path = 'D:/PSA_FBA/Subjects';
+pc_path = '/home/kaneda/Documents/GitHub/Subjects';
 addpath(genpath(pc_path));
 
 % Ask subject number
@@ -27,7 +27,7 @@ Screen('Preference', 'SkipSyncTests', 1);
 rng('shuffle')
 
 screens = Screen('Screens');% Get the screen numbers.
-info.scr_num = min(screens+2);% draw to the externalscreen.
+info.scr_num = min(screens);% draw to the externalscreen.
 
 % Define black and white (white== 1 and black, 0).
 info.white_idx = WhiteIndex(info.scr_num);
@@ -228,18 +228,17 @@ for session = 1:3
     trl.onset_blocks = repmat([1 repelem(0,19)],1,20)';
 
     % defines trial onset and offset. the onsets are randomized to occur
-    % between 500 (30 frames) - 900 (54 frames) ms after fixation onset to avoid temporal
+    % between 500 (60 frames) - 900 (109 frames) ms after fixation onset to avoid temporal
     % expectation.
-    % MUST CHANGE THIS N FRAMES WHEN GO TO THE 120H MONITOR.
-    trl.cue_on = randi([30 54],1,400)';
-    trl.cue_off = trl.cue_on + 4;
+    trl.cue_on = randi([60 109],1,400)';
+    trl.cue_off = trl.cue_on + 8; % cue offset after 75 ms
 
-    trl.targ_on = trl.cue_on + 9; % presents the target 150ms after cue onset (SOA)
-    trl.targ_off = trl.targ_on + 2; % it will stay on the screen for 50ms
+    trl.targ_on = trl.cue_on + 18; % presents the target 150ms after cue onset (SOA)
+    trl.targ_off = trl.targ_on + 5; % it will stay on the screen for 50ms
 
     % White Noise timing based on target offset
-    trl.wnoise_on  = trl.targ_off + 1;   % 16ms ms SOA wnoise-target
-    trl.wnoise_off = trl.wnoise_on + 12; % 200 ms duration
+    trl.wnoise_on  = trl.targ_off + 2;   % 16ms ms SOA wnoise-target
+    trl.wnoise_off = trl.wnoise_on + 24; % 200 ms duration
 
     %% Create data directories
 
