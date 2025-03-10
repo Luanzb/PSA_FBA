@@ -42,7 +42,7 @@ info.scr_ifi = Screen('GetFlipInterval', win);
 
 sca; clc;
 
-info.ntrials = 400;
+info.ntrials = 840;
 
 %% Get the size of the screen window in pixels
 
@@ -59,27 +59,31 @@ info.scr_ysize = info.scr_rect(4);
 info.scr_rrate = round(1/info.scr_ifi);     % Refresh rate
 info.scr_dist_cm = 57;          % Viewing distance from screen (cm)
 
+% parameters for fixation period before every trial onset.
+info.fix_dur_sec = 0.5;         % Duration of fixation at ROI to start trial in secs
+info.roi_fix_dva = 2;           % size of fixation window ROI
+info.roi_fix_pix = dva2pix(info.scr_dist_cm,info.scr_xsize_cm,info.scr_xsize,info.roi_fix_dva);
 %% Gabor INFOS
 
-gabor.rad = 1; %0.8;%1.4; %(radius in dva)
+gabor.rad = 1.1; %0.8;%1.4; %(radius in dva)
 gabor.radPix = round(dva2pix(info.scr_dist_cm, info.scr_xsize_cm, info.scr_xsize, gabor.rad));
 
 gabor.orientation = [0 90]; % all possibilities: 1:cw; 2:ccw
 
-gabor.contrast = .1; %0.8;
+gabor.contrast = 1; %0.8;
 gabor.aspectRatio = 1.0;
 gabor.phase = 0;
 
 % Spatial Frequency (Cycles Per Pixel)
 % One Cycle = Grey-Black-Grey-White-Grey i.e. One Black and One White Lobe
-gabor.numCycles = 5;%6;%3 % para computar 'cycles/pixels'
+gabor.numCycles = 5.5;%6;%3 % para computar 'cycles/pixels'
 gabor.DimPix = info.scr_rect(4)/2;
 gabor.freq = gabor.numCycles/gabor.DimPix;%freq_pix;
 
 %% infos Mask (white noise mask) do script da nina hanning
 
 mask.rad       = gabor.radPix;%30;               % item radius
-mask.pixpc     = 7.6;%10;               % gabor frequency (in pixels per cycle; e.g. 10 for 1 cicle per 10 pixel)
+mask.pixpc     = 7.27;%10;               % gabor frequency (in pixels per cycle; e.g. 10 for 1 cicle per 10 pixel)
 mask.sigma_period      = 0.9;
 mask.sigma             = mask.pixpc*mask.sigma_period;
 mask.noisePixSize      = mask.rad/5; %%%% GOOD PROXY? %%% was 5 before
@@ -134,103 +138,126 @@ info.pholdercoordL = [x3,  x3a, x3,  x3a; y2, y2, y1, y1];  % coordenadas pista 
 info.pholdercoordR = [x4,  x4a, x4,  x4a; y2, y2, y1, y1];  % coord pista lado direito
 
 %%
-% There are four conditions: saccade congruent (SC) and incongruent (SI) and feature
+% There are four conditions: saccade congruent (SC) Neutral-Nonsaccade (NE) and feature
 % congruent (FC) and incongruent (FI).
 
 % 1 = SC + FC
-% 2 = SI + FC
-% 3 = SC + FI
-% 4 = SI + FI
-
-condition1 = [repelem(1,85) repelem(2,85) repelem(3,15) repelem(4,15)]';
-condition = repmat(condition1',1,2)';
-
-% catch trials
-catch_trl1 = zeros(200,1);
-catch_trl1(81:85,1) = 1;
-catch_trl1(166:170,1) = 1;
-catch_trl1(181:185,1) = 1;
-catch_trl1(196:200,1) = 1;
-
-catch_trl = repmat(catch_trl1',1,2)';
-
-% vertical gabor more prone on the left (80%)
-stim_left_v = repelem(1,170)';
-stim_right_v = repelem(2,30)';
-
-% horizontal gabor more prone on the right (80%)
-stim_left_h = repelem(2,170)';
-stim_right_h = repelem(1,30)';
-
-% saccade side (50% for each side).
-sacc_side1 = [repelem([1 2],85)'; repelem([2 1],15)'];
-sacc_side2 = [repelem([2 1],85)'; repelem([1 2],15)'];
-
-feature_type = repelem([1 2], 200)';
-
-stimulus_side = [stim_left_v; stim_right_v; stim_left_h; stim_right_h];
-saccade_side = [sacc_side1; sacc_side2];
-
-%        conditions 1:4    feature      targ side       sacc side       catch trials
-%           see above      1 = verti    1 = left        1 = left        0 = no catch
-%                          2 = hori     2 = right       2 = right       1 = catch
-
-matrix = [condition     feature_type   stimulus_side   saccade_side   catch_trl];
+% 2 = SC + FI
+% 3 = NE + FC
+% 4 = NE + FI
 
 
-% There will be three sessions in total. each session will have an
-% orientation more prone to appear on each side of the screen. For
-% instance, in a given session, most of the gabor targets on the left will
-% have vertical orientation, while most on the right will have horizontal
-% orientation.
-% The orientation more prone on each side for each session is defined below.
-% Subjects with odd number will have the first session with more vertical
-% on the left and more horizontal on the right. In the second session this
-% will invert and on the third will be the same as the first session. For
-% even subjects number, the first session will be horizontal (left) and
-% vertical (right).
+
+%        conditions 1:4    feature      targ side       catch trials
+%           see above      1 = CW       1 = left        0 = no catch
+%                          2 = CCW      2 = right        1 = catch
+
+condition1 = [repelem(1,72) repelem(2,18) repelem(1,72)  repelem(2,18)]';
+condition2 = [repelem(3,72) repelem(4,18) repelem(3,72)  repelem(4,18)]';
+
+feature_type1 = repelem(1, 180)';
+
+target_side1 = repelem([1 2], 90)';
+
+catch_trl1 = repmat([repelem(0,60) repelem(1,12) repelem(0,15)  repelem(1,3)]',2,1);
+
+matrix1 = repmat([condition1 feature_type1  target_side1  catch_trl1],2,1); 
+
+matrix1(181:end,1) = condition2;
+
+matrix1 = [matrix1; matrix1];
+
+matrix1(361:end,2) = 2; 
+
+
 
 if rem(sub.id_num,2) == 1
-    trl.feature_ses = [1 2;2 1;1 2];
+    trl.feature_ses = [1 2;2 1];
 else
-    trl.feature_ses = [2 1; 1 2; 2 1];
+    trl.feature_ses = [2 1; 1 2];
 end
 
 % create matrix of trials for each session, as well as timings for cue and
 % target appearance and target orientation.
 
-for session = 1:3
+for session = 1:2
 
-    matrix(1:200,2)   = trl.feature_ses(session,1);
-    matrix(201:400,2) = trl.feature_ses(session,2);
+    matrix1(1:360,2)   = trl.feature_ses(session,1);
+    matrix1(361:720,2) = trl.feature_ses(session,2);
 
 
-    % randomize trials order within a given session. the loop below asures
-    % that the first trial of each session is both sacade and feature
-    % congruent.
+    % Randomize trials separetly for saccade and neutral conditions.
+    matrix(1:180,:)   = Shuffle(matrix1(1:180,:),2);   % saccade 
+    matrix(181:360,:) = Shuffle(matrix1(181:360,:),2); % neutral
+    matrix(361:540,:)   = Shuffle(matrix1(361:540,:),2);   % saccade 
+    matrix(541:720,:) = Shuffle(matrix1(541:720,:),2); % neutral
+  
+    % Randomize blocks of trials in a given session. each block contains 30
+    % trials. If the number condition is 1 or 2, is a saccade block,
+    % whereas a number 3 or 4 is a neutral block (no saccade). 
+    blocks = [(1:30:720)' (30:30:720)'];
+    
+    shuffled_blocks1 = Shuffle(blocks(1:12,:),2);
+    shuffled_blocks2 = Shuffle(blocks(13:24,:),2);
+    shuffled_blocks = [shuffled_blocks1;shuffled_blocks2];
 
-    b = false;
-    while b == false
-        mat_rows = randperm(size(matrix,1));
-        info.matrix =  matrix(mat_rows,:);
-        if info.matrix(1,1) == 1
-            b = true;
-        end
+    for m = 1:24
+
+        matrix2(blocks(m,1):blocks(m,2),:) = matrix(shuffled_blocks(m,1):shuffled_blocks(m,2),:);
+    
     end
+ 
+   mat_trng1 = matrix2(331:360,:);
+   mat_trng2 = matrix2(691:720,:);
+   mat_trng3 = Shuffle(matrix2(331:360,:),2);
+   mat_trng4 = Shuffle(matrix2(691:720,:),2);
 
+
+   mat_trng1(mat_trng1(:,1) == 3 ,1) = 1;
+   mat_trng1(mat_trng1(:,1) == 4 ,1) = 2;
+
+   mat_trng2(mat_trng2(:,1) == 3 ,1) = 1;
+   mat_trng2(mat_trng2(:,1) == 4 ,1) = 2;
+
+   mat_trng3(mat_trng3(:,1) == 1 ,1) = 3;
+   mat_trng3(mat_trng3(:,1) == 2 ,1) = 4;
+
+   mat_trng4(mat_trng4(:,1) == 1 ,1) = 3;
+   mat_trng4(mat_trng4(:,1) == 2 ,1) = 4;
+
+   info.matrix = [mat_trng1;         % Training: Saccade block
+                  mat_trng3;         % Training: Fixation block
+                 matrix2(1:360,:);    % Experiment
+                 mat_trng2;          % Training: Saccade block
+                 mat_trng4;          % Training: Fixation block
+                 matrix2(361:end,:)]; % Experiment
+   
+   % This fifth column represents training (ones) and no training trials (zeros)
+   info.matrix(:,5) = [repelem(1,60) repelem(0,360) repelem(1,60) repelem(0,360)]';
 
     %%
-    % target orientation for each trial in a given session.
-    trl.targ_ori(info.matrix(:,2)' == 1,1) = 0;      % vertical orientation
-    trl.targ_ori(info.matrix(:,2)' == 2,1) = 90;     % horizontal orientation
+    % target orientation for each trial when the most probable orientation
+    % is clockwise (315)
+     trl.targ_ori((info.matrix(:,1) == 1 & info.matrix(:,2) == 1),1) = 315;      % clockwise orientation
+     trl.targ_ori((info.matrix(:,1) == 2 & info.matrix(:,2) == 1),1) = 45;      % counterclockwise orientation
+     trl.targ_ori((info.matrix(:,1) == 3 & info.matrix(:,2) == 1),1) = 315;      % clockwise orientation
+     trl.targ_ori((info.matrix(:,1) == 4 & info.matrix(:,2) == 1),1) = 45;      % counterclockwise orientation
+  
+    % target orientation for each trial when the most probable orientation
+    % is counterclockwise (45)
+     trl.targ_ori((info.matrix(:,1) == 1 & info.matrix(:,2) == 2),1) = 45;    
+     trl.targ_ori((info.matrix(:,1) == 2 & info.matrix(:,2) == 2),1) = 315;     
+     trl.targ_ori((info.matrix(:,1) == 3 & info.matrix(:,2) == 2),1) = 45;      
+     trl.targ_ori((info.matrix(:,1) == 4 & info.matrix(:,2) == 2),1) = 315;      
+
 
     % ones mark the beginning of a block of trials.
-    trl.onset_blocks = repmat([1 repelem(0,19)],1,20)';
+    trl.onset_blocks = repmat([1 repelem(0,29)],1,28)';
 
     % defines trial onset and offset. the onsets are randomized to occur
     % between 500 (60 frames) - 900 (109 frames) ms after fixation onset to avoid temporal
     % expectation.
-    trl.cue_on = randi([60 109],1,400)';
+    trl.cue_on = randi([60 109],1,840)';
     trl.cue_off = trl.cue_on + 8; % cue offset after 75 ms
 
     trl.targ_on = trl.cue_on + 18; % presents the target 150ms after cue onset (SOA)
@@ -238,7 +265,7 @@ for session = 1:3
 
     % White Noise timing based on target offset
     trl.wnoise_on  = trl.targ_off + 2;   % 16ms ms SOA wnoise-target
-    trl.wnoise_off = trl.wnoise_on + 24; % 200 ms duration
+    trl.wnoise_off = trl.wnoise_on + 12; % 100 ms duration
 
     %% Create data directories
 
