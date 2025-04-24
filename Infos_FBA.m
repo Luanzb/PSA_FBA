@@ -2,7 +2,7 @@
 git_path = '/home/kaneda/Documents/GitHub/PSA_FBA';
 addpath(genpath(git_path));
 
-pc_path = '/home/kaneda/Documents/GitHub/Subjects';
+pc_path = '/home/kaneda/Documents/Projects/PSA_FBA';
 addpath(genpath(pc_path));
 
 % Ask subject number
@@ -141,10 +141,10 @@ info.pholdercoordR = [x4,  x4a, x4,  x4a; y2, y2, y1, y1];  % coord pista lado d
 % There are four conditions: saccade congruent (SC) Neutral-Nonsaccade (NE) and feature
 % congruent (FC) and incongruent (FI).
 
-% 1 = SC + FC
-% 2 = SC + FI
-% 3 = NE + FC
-% 4 = NE + FI
+% 1 = VAL + FC
+% 2 = VAL + FI
+% 3 = INVAL + FC
+% 4 = INVAL + FI
 
 
 
@@ -187,10 +187,10 @@ for session = 1:2
 
 
     % Randomize trials separetly for saccade and neutral conditions.
-    matrix(1:180,:)   = Shuffle(matrix1(1:180,:),2);   % saccade 
-    matrix(181:360,:) = Shuffle(matrix1(181:360,:),2); % neutral
-    matrix(361:540,:)   = Shuffle(matrix1(361:540,:),2);   % saccade 
-    matrix(541:720,:) = Shuffle(matrix1(541:720,:),2); % neutral
+    matrix(1:360,:)   = Shuffle(matrix1(1:360,:),2);   % saccade 
+    %matrix(181:360,:) = Shuffle(matrix1(181:360,:),2); % neutral
+    matrix(361:720,:)   = Shuffle(matrix1(361:720,:),2);   % saccade 
+    %matrix(541:720,:) = Shuffle(matrix1(541:720,:),2); % neutral
   
     % Randomize blocks of trials in a given session. each block contains 30
     % trials. If the number condition is 1 or 2, is a saccade block,
@@ -225,11 +225,13 @@ for session = 1:2
    mat_trng4(mat_trng4(:,1) == 1 ,1) = 3;
    mat_trng4(mat_trng4(:,1) == 2 ,1) = 4;
 
-   info.matrix = [mat_trng1;         % Training: Saccade block
-                  mat_trng3;         % Training: Fixation block
+
+    mat_trng11 = Shuffle([mat_trng1; mat_trng3],2);
+    mat_trng22 = Shuffle([mat_trng2; mat_trng4],2);
+
+   info.matrix = [mat_trng11;         % Training
                  matrix2(1:360,:);    % Experiment
-                 mat_trng2;          % Training: Saccade block
-                 mat_trng4;          % Training: Fixation block
+                 mat_trng22;          % Training
                  matrix2(361:end,:)]; % Experiment
    
    % This fifth column represents training (ones) and no training trials (zeros)
@@ -254,14 +256,17 @@ for session = 1:2
     % ones mark the beginning of a block of trials.
     trl.onset_blocks = repmat([1 repelem(0,29)],1,28)';
 
+    % ones mark the end of a block of trials.
+    trl.offset_blocks = repmat([repelem(0,29) 1],1,28)';
+
     % defines trial onset and offset. the onsets are randomized to occur
     % between 500 (60 frames) - 900 (109 frames) ms after fixation onset to avoid temporal
     % expectation.
     trl.cue_on = randi([60 109],1,840)';
-    trl.cue_off = trl.cue_on + 8; % cue offset after 75 ms
+    trl.cue_off = trl.cue_on + 9; % cue offset after 75 ms
 
     trl.targ_on = trl.cue_on + 18; % presents the target 150ms after cue onset (SOA)
-    trl.targ_off = trl.targ_on + 5; % it will stay on the screen for 50ms
+    trl.targ_off = trl.targ_on + 5; % it will stay on the screen for 40ms
 
     % White Noise timing based on target offset
     trl.wnoise_on  = trl.targ_off + 2;   % 16ms ms SOA wnoise-target

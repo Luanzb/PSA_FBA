@@ -119,8 +119,11 @@ try
 
         [gabortex, propertiesMat] = stim_gabor(win,gabor);
 
-         % Cria Mask (White Noise patch)
-        texMask = mask_noise(win, mask, info);
+        % Cria Mask (White Noise patch)
+        texMaskR = mask_noise(win, mask, info);
+        texMaskL = mask_noise(win, mask, info);
+
+        FIX = 2;
 
 
         Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode before drawing Host PC graphics and before recording
@@ -146,9 +149,9 @@ try
                 if ~isempty(buttons)
                     if buttons(1,5) == 1         % White button
                         break;
-                    % elseif buttons(1,4) == 1     % Blue button
-                    %     abort = true;
-                    %     break;
+                        % elseif buttons(1,4) == 1     % Blue button
+                        %     abort = true;
+                        %     break;
                     end
                 end
             end
@@ -171,7 +174,7 @@ try
         Eyelink('Command', 'clear_screen 0');       % Clear Host PC display from any previus drawing
         %Eyelink('ImageTransfer', '/home/kaneda/Documents/GitHub/PSA_FBA/Images/trl_on.bmp', 0, 0, 0, 0, 0, 0);
         Eyelink('StartRecording');
-       % Eyelink('Command', 'record_status_message "TRIAL %d/%d"', session, size(info.ntrials,1));
+        % Eyelink('Command', 'record_status_message "TRIAL %d/%d"', session, size(info.ntrials,1));
 
         % DRAW FIXATION POINT in red FOR 500 MS BEFORE TRIAL ONSET.
         Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -180,10 +183,6 @@ try
         Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
         Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
         time.fp_on(session) = Screen('Flip', win);
-
-        
-         % current_display = Screen('GetImage',win);
-         % imwrite(current_display, 'fp_calibration.png');
 
         % Wait until participant is fixating for info.fix_dur_sec
         while 1
@@ -206,8 +205,15 @@ try
         end
 
 
-        for trial = 1:trl.wnoise_off(session,1) % TRIAL WILL END 100 MS AFTER TARG OFF (mask off)
+        for trial = 1:trl.wnoise_off(session,1)+12 % TRIAL WILL END 200 MS AFTER TARG OFF (mask off)
 
+
+            if Eyelink('NewFloatSampleAvailable') > 0
+                evt = Eyelink('NewestFloatSample');                     % Get the sample in the form of an event structure
+                x_gaze = evt.gx(eye_used);                              % Get current gaze position from sample
+                y_gaze = evt.gy(eye_used);
+            end
+            
 
             Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
@@ -246,15 +252,15 @@ try
             % Draw noise patches
             if trial >= trl.wnoise_on(session,1) && trial <= trl.wnoise_off(session,1)
 
-                if mat.matrix(session,2) == 1
+            %    if mat.matrix(session,2) == 1
 
                     Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-                    Screen('DrawTextures',win,texMask,[],info.coordL,0,[],[]);
+                    Screen('DrawTextures',win,texMaskL,[],info.coordL,0,[],[]);
 
-                else
+             %   else
                     Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-                    Screen('DrawTextures',win,texMask,[],info.coordR,0,[],[]);
-                end
+                    Screen('DrawTextures',win,texMaskR,[],info.coordR,0,[],[]);
+              %  end
 
             end
 
@@ -262,37 +268,18 @@ try
             Screen('Flip', win);
 
             if sub.treino == 's'
-                WaitSecs(.03);
+                WaitSecs(info.trng_time);
             end
 
-            % if trial == 1
-            %     current_display = Screen('GetImage',win);
-            %     imwrite(current_display, 'FP.png');
-            % elseif trial == trl.cue_on(session,1)
-            %     current_display = Screen('GetImage',win);
-            %     imwrite(current_display, 'cue.png');
-            % elseif trial == trl.targ_on(session,1)
-            %     if mat.matrix(session,2) == 1
-            %         if mat.matrix(session,1) == 1
-            %             current_display = Screen('GetImage',win);
-            %             imwrite(current_display, 'Ltarg__CW.png');
-            %         else
-            %             current_display = Screen('GetImage',win);
-            %             imwrite(current_display, 'Ltarg__CCW.png');
-            %         end
-            %     else
-            %         if mat.matrix(session,1) == 1
-            %             current_display = Screen('GetImage',win);
-            %             imwrite(current_display, 'Rtarg__CW.png');
-            %         else
-            %             current_display = Screen('GetImage',win);
-            %             imwrite(current_display, 'Rtarg__CCW.png');
-            %         end
-            %     end
-            % elseif trial == trl.wnoise_on(session,1)
-            %     current_display = Screen('GetImage',win);
-            %     imwrite(current_display, 'wnoise.png');
-            % end
+
+             if trial >= 1 && trial <= trl.targ_off(session,1)
+                    if ~inFixWindow(x_gaze,y_gaze,fix_win_center)
+                        if FIX == 2
+                            FIX = 3;
+                        end
+                    end
+             end
+
 
         end
 
@@ -301,8 +288,14 @@ try
         Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
         Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix, info.white_idx, [], 2,1);
-        Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
-        Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+
+        if mat.matrix(session,2) == 1
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix*1.5,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+        else
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix*1.5,info.black_idx,[],2,1);
+        end
 
 
         Screen('Flip', win);
@@ -310,25 +303,49 @@ try
         ResponsePixx('StartNow', 1, [0 1 0 1 0], 1);
         while 1
             [buttons, ~, ~] = ResponsePixx('GetLoggedResponses', 1, 1, 2000);
-            if ~isempty(buttons)
-                if buttons(1,2) == 1         % Yellow button (saw the target)
-                    response = 1;
-                    break;
-                elseif buttons(1,4) == 1     % Blue button (didn't see the target)
-                    response = 0;
-                %    abort = true;
-                    break;
+
+            if sub.treino == 's'
+
+                if ~isempty(buttons)
+                    if buttons(1,2) == 1         % Yellow button (saw the target)
+                        response = 1;
+                        break;
+                    elseif buttons(1,4) == 1     % Blue button (didn't see the target)
+                        response = 0;
+                        %    abort = true;
+                        break;
+                    elseif buttons(1,5) == 1         % White button
+                        abort = true;
+                        break;
+                    end
+                end
+            else
+                if ~isempty(buttons)
+                    if buttons(1,2) == 1         % Yellow button (saw the target)
+                        response = 1;
+                        break;
+                    elseif buttons(1,4) == 1     % Blue button (didn't see the target)
+                        response = 0;
+                        %    abort = true;
+                        break;
+                    end
                 end
             end
+
         end
         ResponsePixx('StopNow', 1, [0 0 0 0 0], 0);
 
-        % if abort == true
-        %     break;
-        % end
+
+        % abort experiment training if abort is true. for the staircase per
+        % se, it is not possible to abort during the experiment.
+        if sub.treino == 's'
+            if abort == true
+                break;
+            end
+        end
 
 
-          % get orientation response if subject reports target present
+        % get orientation response if subject reports target present
         if response == 1
 
             ResponsePixx('StartNow', 1, [1 0 1 0 0], 1);
@@ -357,6 +374,56 @@ try
         elseif response == 0 && mat.matrix(session,3) == 0 % Miss
             resp(session,4) = 1;
         end
+
+
+        % during staircase training, fixation dot turns yellow if target
+        % present or blue if absent at the end of each trial.
+        if sub.treino == 's'
+            if resp(session,1) == 1 || resp(session,4) == 1
+                fp = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/yfp.png');
+            elseif resp(session,2) == 1 || resp(session,3) == 1
+                fp = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/bfp.png');
+            end
+
+            tex_col = Screen('MakeTexture', win, fp); clear fp;
+
+            Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawTexture', win, tex_col, [], [info.scr_xcenter - info.dot_size_pix/2 ...
+                info.scr_ycenter - info.dot_size_pix/2 ...
+                info.scr_xcenter + info.dot_size_pix/2 ...
+                info.scr_ycenter + info.dot_size_pix/2], 0);
+            Screen('Flip', win); WaitSecs(0.3);
+
+             % DRAW FIXATION POINT AND PLACEHOLDERS
+            Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix, info.white_idx, [], 2,1);
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('Flip', win); WaitSecs(0.2);
+
+        end
+
+
+         if FIX == 3
+
+            ofp = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/ofp.jpg');
+            tex_col2 = Screen('MakeTexture', win, ofp); clear ofp;
+
+            Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawTexture', win, tex_col2, [], [info.scr_xcenter - info.dot_size_pix/2 ...
+                info.scr_ycenter - info.dot_size_pix/2 ...
+                info.scr_xcenter + info.dot_size_pix/2 ...
+                info.scr_ycenter + info.dot_size_pix/2], 0);
+            Screen('Flip', win); WaitSecs(0.3);
+        end
+
 
 
         % update staircase value if the current trial had a target

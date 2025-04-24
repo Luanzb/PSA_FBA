@@ -2,7 +2,7 @@
 git_path = '/home/kaneda/Documents/GitHub/PSA_FBA';
 addpath(genpath(git_path));
 
-pc_path = '/home/kaneda/Documents/GitHub/Subjects';
+pc_path = '/home/kaneda/Documents/Projects/PSA_FBA';
 addpath(genpath(pc_path));
 
 % Ask subject number
@@ -179,7 +179,7 @@ mat.matrix =    [repmat([1 2],1, 30)'     target_side      catch_trl];
     % between 500 (60 frames) - 900 (109 frames) ms after fixation onset to avoid temporal
     % expectation.
     trl.cue_on = randi([60 109],1,60)';
-    trl.cue_off = trl.cue_on + 8; % cue offset after 75 ms
+    trl.cue_off = trl.cue_on + 9; % cue offset after 75 ms
 
     trl.targ_on = trl.cue_on + 18; % presents the target 150 ms after cue onset (SOA)
     trl.targ_off = trl.targ_on + 5; % it will stay on the screen for 50ms

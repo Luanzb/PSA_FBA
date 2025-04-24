@@ -1,4 +1,4 @@
-function [resp,time] = On_Screen(info,trl,sub,gabor,mask)
+function [srt,resp,time] = On_Screen(info,trl,sub,gabor,mask)
 % First column  = Hits;
 % Second column = False Alarms
 % Third column  =  Correct rejections
@@ -108,23 +108,28 @@ fix_win_center = CenterRect(fix_win_center, info.scr_rect);
 
 block_counter = 0;
 
+session = 1;
 
 try
 
     abort = false;
 
 
-    for session = 415:info.ntrials % 1:info.ntrials
+    while session <= info.ntrials % 1:info.ntrials
 
         % Cria gabor patch com contrast especifico
         gabor.contrast = sub.targ;
         [gabortex, propertiesMat] = stim_gabor(win,gabor);
 
+
+        SRT2 = 2;
+
+
         Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode before drawing Host PC graphics and before recording
 
         % Cria Mask (White Noise patch)
-        texMask = mask_noise(win, mask, info);
-
+        texMaskR = mask_noise(win, mask, info);
+        texMaskL = mask_noise(win, mask, info);
 
         if trl.onset_blocks(session,1) == 1
 
@@ -156,7 +161,7 @@ try
 
 
 
-             Screen('TextSize',win, 24);
+            Screen('TextSize',win, 24);
 
 
             if info.matrix(session,2) == 1
@@ -170,13 +175,13 @@ try
 
 
             txt_ = '----------------------';
-            if info.matrix(session,1) == 1 || info.matrix(session,1) == 2
-                txt4 = 'BLOCO DE MOVIMENTO OCULAR!';
-                color = [0 0 1];
-            else
-                txt4 = 'BLOCO DE FIXAÇÃO!';
-                color = [1 1 0];
-            end
+            % if info.matrix(session,1) == 1 || info.matrix(session,1) == 2
+            txt4 = 'ORIENTAÇÃO MAIS PROVÁVEL ABAIXO!';
+            color = [0 0 1];
+            % else
+            %     txt4 = 'BLOCO DE FIXAÇÃO!';
+            %     color = [1 1 0];
+            % end
 
             txt5 = '';
 
@@ -195,9 +200,9 @@ try
             DrawFormattedText(win, txt3, 'center', info.scr_ycenter + 180,info.black_idx);
             DrawFormattedText(win, txt_, 'center', info.scr_ycenter + 200,info.black_idx);
 
-           
+
             if ismember(session,[1 31 421 451])
-            
+
                 texto1 = 'HORA DO TREINO!' ;
                 DrawFormattedText(win, texto1, 'center', info.scr_ycenter - 300,color);
                 Screen('FrameRect',win,color, [960-500 540-400 960+500 540+400],4);
@@ -263,7 +268,16 @@ try
 
 
 
-        for trial = 1:trl.wnoise_off(session,1) % TRIAL WILL END 200 MS AFTER TARG OFF (mask off)
+        for trial = 1:trl.wnoise_off(session,1)+12 % TRIAL WILL END 200 MS AFTER TARG OFF (mask off)
+
+
+            times = GetSecs;
+
+            if Eyelink('NewFloatSampleAvailable') > 0
+                evt = Eyelink('NewestFloatSample');                     % Get the sample in the form of an event structure
+                x_gaze = evt.gx(eye_used);                              % Get current gaze position from sample
+                y_gaze = evt.gy(eye_used);
+            end
 
 
             Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -271,7 +285,7 @@ try
             % CUE ONSET
             if trial >= trl.cue_on(session,1) && trial <= trl.cue_off(session,1)
 
-                % Cue on saccade condition
+                % Cue on valid condition
                 if info.matrix(session,1) == 1 || info.matrix(session,1) == 2
                     if info.matrix(session,3) == 1
                         Screen('DrawLine', win, info.black_idx, info.scr_xcenter,info.scr_ycenter ...
@@ -281,12 +295,16 @@ try
                             ,info.scr_xcenter + info.cue_length_px,info.scr_ycenter, info.cue_width_px);
                     end
 
-                else % Cue on neutral condition
+                else % Cue on invalid condition
+                    if info.matrix(session,3) == 1
 
-                    Screen('DrawLine', win, info.black_idx, info.scr_xcenter,info.scr_ycenter ...
-                        ,info.scr_xcenter - info.cue_length_px,info.scr_ycenter, info.cue_width_px);
-                    Screen('DrawLine', win, info.black_idx, info.scr_xcenter,info.scr_ycenter ...
-                        ,info.scr_xcenter + info.cue_length_px,info.scr_ycenter, info.cue_width_px);
+                        Screen('DrawLine', win, info.black_idx, info.scr_xcenter,info.scr_ycenter ...
+                            ,info.scr_xcenter + info.cue_length_px,info.scr_ycenter, info.cue_width_px);
+                    else
+                        Screen('DrawLine', win, info.black_idx, info.scr_xcenter,info.scr_ycenter ...
+                            ,info.scr_xcenter - info.cue_length_px,info.scr_ycenter, info.cue_width_px);
+
+                    end
                 end
             end
 
@@ -317,15 +335,15 @@ try
             % Draw noise patches
             if trial >= trl.wnoise_on(session,1) && trial <= trl.wnoise_off(session,1)
 
-                if info.matrix(session,3) == 1
+                % if info.matrix(session,3) == 1
 
-                    Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-                    Screen('DrawTextures',win,texMask,[],info.coordL,0,[],[]);
+                Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+                Screen('DrawTextures',win,texMaskL,[],info.coordL,0,[],[]);
 
-                else
-                    Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-                    Screen('DrawTextures',win,texMask,[],info.coordR,0,[],[]);
-                end
+                % else
+                Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+                Screen('DrawTextures',win,texMaskR,[],info.coordR,0,[],[]);
+                % end
 
             end
 
@@ -356,15 +374,24 @@ try
                 Screen('Flip', win);
             end
 
-            % if trial == trl.targ_on(session,1)
-            %     if info.matrix(session,1) == 1
-            %         current_display = Screen('GetImage',win);
-            %         imwrite(current_display, 'target_CW.png');
-            %     else
-            %         current_display = Screen('GetImage',win);
-            %         imwrite(current_display, 'target_CCW.png');
-            %     end
-            % end
+
+            if trial == trl.wnoise_on(session,1)
+                if info.matrix(session,3) == 2
+                    current_display = Screen('GetImage',win);
+                    imwrite(current_display, 'wnoise.png');
+                end
+            end
+
+
+            if trial >= trl.cue_on(session,1)
+                if ~inFixWindow(x_gaze,y_gaze,fix_win_center)
+                    if SRT2 == 2
+                        SRT2 = times - time.cue_on(session);
+                        srt(session) = SRT2; %#ok<AGROW>
+                    end
+                end
+            end
+
 
         end
 
@@ -372,11 +399,25 @@ try
         Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
         Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix, info.white_idx, [], 2,1);
-        Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
-        Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+
+        if info.matrix(session,3) == 1
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix*1.5,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+        else
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix*1.5,info.black_idx,[],2,1);
+        end
 
 
         Screen('Flip', win);
+
+
+            if info.matrix(session,3) == 2
+                current_display = Screen('GetImage',win);
+                imwrite(current_display, 'cue_resp.png');
+            end
+
+
 
         % ResponsePixx color mapping
         %%% red    [1] = right
@@ -444,7 +485,9 @@ try
             ResponsePixx('StopNow', 1, [0 0 0 0 0], 0);
 
         end
+
         toc
+
 
 
         % Colect answer for each trial.
@@ -461,13 +504,107 @@ try
         end
 
 
-        if trl.onset_blocks(session+1,1) == 1 || session == size(trl.onset_blocks,1)
+        % if info.matrix(session,1) == 3 || info.matrix(session,1) == 4
+        %     SRT2 = 0;
+        % end
+
+
+        if (session >= 1 && session <= 60) || (session >= 421 && session <= 480)
+
+            if resp(session,1) == 1 || resp(session,4) == 1
+                fp = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/yfp.png');
+            elseif resp(session,2) == 1 || resp(session,3) == 1
+                fp = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/bfp.png');
+            end
+
+            tex_col = Screen('MakeTexture', win, fp); clear fp;
+
+            Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawTexture', win, tex_col, [], [info.scr_xcenter - info.dot_size_pix/2 ...
+                info.scr_ycenter - info.dot_size_pix/2 ...
+                info.scr_xcenter + info.dot_size_pix/2 ...
+                info.scr_ycenter + info.dot_size_pix/2], 0);
+            Screen('Flip', win); WaitSecs(0.3);
+
+
+            % DRAW FIXATION POINT AND PLACEHOLDERS
+            Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix, info.white_idx, [], 2,1);
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('Flip', win); WaitSecs(0.2);
+
+        end
+
+
+        if  SRT2 > 0.33  % || FIX == 3
+
+            ofp = imread('/home/kaneda/Documents/GitHub/PSA_FBA/Images/ofp.jpg');
+            tex_col2 = Screen('MakeTexture', win, ofp); clear ofp;
+
+            Screen('BlendFunction',win,GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            Screen('DrawDots', win, [info.scr_xcenter info.scr_ycenter], info.dot_size_pix*2, info.black_idx, [], 2,1);
+            Screen('DrawDots',win,info.pholdercoordL,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
+            Screen('DrawTexture', win, tex_col2, [], [info.scr_xcenter - info.dot_size_pix/2 ...
+                info.scr_ycenter - info.dot_size_pix/2 ...
+                info.scr_xcenter + info.dot_size_pix/2 ...
+                info.scr_ycenter + info.dot_size_pix/2], 0);
+            Screen('Flip', win); WaitSecs(0.3);
+        end
+
+
+
+        %--------------------------------------------------------------------------
+
+        if session == 60 || session == 480
+
+            txt6 = 'Deseja realizar o treino novamente? \n\n (Sim - verde / Não - Vermelho)';
+            DrawFormattedText(win, txt6, 'center', info.scr_ycenter - 250, info.black_idx);
+            Screen('Flip', win);
+
+
+            ResponsePixx('StartNow', 1, [1 0 1 0 0], 1);
+            while 1
+                [buttons, ~, ~] = ResponsePixx('GetLoggedResponses', 1, 1, 2000);
+                if ~isempty(buttons)
+                    if buttons(1,1) == 1         % Red button (go to experiment)
+                        resp_trng = 1;
+                        break;
+                    elseif buttons(1,3) == 1     % Green button (training again)
+                        resp_trng = 0;
+                        break;
+                        % elseif ~isempty(buttons)
+                        %     if buttons(1,2) == 1     % Yellow button
+                        %         abort = true;
+                        %         break;
+                        %     end
+                    end
+                end
+            end
+            ResponsePixx('StopNow', 1, [0 0 0 0 0], 0);
+
+            if resp_trng == 0
+
+                session = abs(session - 60);
+            end
+        end
+
+        %--------------------------------------------------------------------------
+
+
+        if trl.offset_blocks(session,1) == 1
+
             if session == size(trl.onset_blocks,1)
                 txt = 'Voce completou todos os blocos da sessão. \n\n Parabéns!';
                 DrawFormattedText(win, txt, 'center', info.scr_ycenter - 250, info.black_idx);
-            elseif trl.onset_blocks(session+1,1) == 1
+            elseif trl.offset_blocks(session,1) == 1
 
-                txt = sprintf('Bloco %i/%i completo.\n\n Hora do descanso', block_counter, sum(trl.onset_blocks));
+                txt = sprintf('Bloco %i/%i completo.\n\n Hora do descanso!', block_counter, sum(trl.onset_blocks));
                 txt1 = 'Pressione o botão            para continuar!';
                 txt2 = ' branco';
 
@@ -498,6 +635,8 @@ try
 
 
         end
+
+        session = session + 1;
 
 
     end

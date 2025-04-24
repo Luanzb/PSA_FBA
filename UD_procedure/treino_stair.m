@@ -45,6 +45,9 @@ tex_Rtarg_CCW = Screen('MakeTexture', win, Rtarg_CCW);
 wnoise = imread(sprintf('wnoise.png'));
 tex_wnoise = Screen('MakeTexture', win, wnoise);
 
+cue_resp = imread(sprintf('cue_resp.png'));
+tex_cue_resp = Screen('MakeTexture', win, cue_resp);
+
 
 clear ex_img;
 
@@ -56,30 +59,36 @@ trl_exp = 1;
 while trl_exp <= 6
 
 
-    % initial calibration (red fp)
-    if trl_exp == 1
-        Screen('DrawTexture', win, tex_fp_calibration, [], [], 0);
-    end
-
     % trial onset
-    if trl_exp == 2
+    if trl_exp == 1
         Screen('DrawTexture', win, tex_FP, [], [], 0);
     end
 
     % Cue onset
-    if trl_exp == 3
+    if trl_exp == 2
         Screen('DrawTexture', win, tex_cue, [], [], 0);
     end
 
     % Target onset
-    if trl_exp == 4
+    if trl_exp == 3
         Screen('DrawTexture', win, tex_Rtarg_CW, [], [], 0);
     end
 
     % Gaussian envelope onset
-    if trl_exp == 5
+    if trl_exp == 4
         Screen('DrawTexture', win, tex_wnoise, [], [], 0);
     end
+
+    % only polders and fp
+    if trl_exp == 5
+        Screen('DrawTexture', win, tex_FP, [], [], 0);
+    end
+
+    % response cue
+    if trl_exp == 6
+        Screen('DrawTexture', win, tex_cue_resp, [], [], 0);
+    end
+
 
 
     Screen('Flip', win);

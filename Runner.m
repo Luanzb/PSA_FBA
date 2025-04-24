@@ -4,7 +4,7 @@ close all; clear; clc;
 git_path = '/home/kaneda/Documents/GitHub/PSA_FBA';
 addpath(genpath(git_path));
 
-pc_path = '/home/kaneda/Documents/GitHub/Subjects';
+pc_path =  '/home/kaneda/Documents/Projects/PSA_FBA';
 addpath(genpath(pc_path));
 
 cd(git_path);
@@ -43,13 +43,13 @@ end
 
 %% Run experiment
 
-[resp,time] = On_Screen(info,trl,sub,gabor,mask);
+[srt,resp,time] = On_Screen(info,trl,sub,gabor,mask);
 
 %%
 
 % Save data files
 sub.data_fname = sprintf('data_sub_%d_ses_%d_%s', sub.id_num, sub.ses_num, datestr(now,'yymmdd-HHMM')); %#ok<TNOW1,DATST>
-save(fullfile(sprintf('%s/Data/S%d/Task/%s', pc_path, sub.id_num), [sub.data_fname, '.mat']), 'info', 'trl', 'sub','resp','gabor','mask','time', '-v7.3'); % resp
+save(fullfile(sprintf('%s/Data/S%d/Task/%s', pc_path, sub.id_num), [sub.data_fname, '.mat']), 'info', 'trl', 'sub','resp','gabor','mask','time','srt', '-v7.3'); % resp
 
 sub.eye_fname = 'FBAeye.edf';
 if exist(sub.eye_fname, 'file')
@@ -58,3 +58,7 @@ else
     error('Eye-tracker data file not found!');
 end
 
+
+[s] = GetSRT(sub);
+
+save(fullfile(sprintf('%s/Data/S%d/Task/%s', pc_path, sub.id_num), [sub.data_fname, '.mat']), 'info', 'trl', 'sub','resp','gabor','mask','time','srt','s', '-v7.3'); % resp
