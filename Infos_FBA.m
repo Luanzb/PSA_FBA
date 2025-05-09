@@ -258,6 +258,8 @@ for session = 1:2
 
     % ones mark the end of a block of trials.
     trl.offset_blocks = repmat([repelem(0,29) 1],1,28)';
+    % twos mark the resting block
+    trl.offset_blocks(60:60:840,1) = 2;
 
     % defines trial onset and offset. the onsets are randomized to occur
     % between 500 (60 frames) - 900 (109 frames) ms after fixation onset to avoid temporal
@@ -271,6 +273,8 @@ for session = 1:2
     % White Noise timing based on target offset
     trl.wnoise_on  = trl.targ_off + 2;   % 16ms ms SOA wnoise-target
     trl.wnoise_off = trl.wnoise_on + 12; % 100 ms duration
+
+    trl.repeated_blk = zeros(1,2);
 
     %% Create data directories
 

@@ -105,6 +105,7 @@ fix_win_center = [-info.roi_fix_pix -info.roi_fix_pix info.roi_fix_pix info.roi_
 fix_win_center = CenterRect(fix_win_center, info.scr_rect);
 
 %%
+trl.repeated_blk = zeros(1,2);
 
 block_counter = 0;
 
@@ -122,7 +123,7 @@ try
         [gabortex, propertiesMat] = stim_gabor(win,gabor);
 
 
-        SRT2 = 2;
+        SRT2 = 2; resp_trng = 2;
 
 
         Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode before drawing Host PC graphics and before recording
@@ -175,13 +176,9 @@ try
 
 
             txt_ = '----------------------';
-            % if info.matrix(session,1) == 1 || info.matrix(session,1) == 2
             txt4 = 'ORIENTAÇÃO MAIS PROVÁVEL ABAIXO!';
             color = [0 0 1];
-            % else
-            %     txt4 = 'BLOCO DE FIXAÇÃO!';
-            %     color = [1 1 0];
-            % end
+
 
             txt5 = '';
 
@@ -268,7 +265,7 @@ try
 
 
 
-        for trial = 1:trl.wnoise_off(session,1)+12 % TRIAL WILL END 200 MS AFTER TARG OFF (mask off)
+        for trial = 1:trl.wnoise_off(session,1)+24 % TRIAL WILL END 300 MS AFTER TARG OFF (mask off)
 
 
             times = GetSecs;
@@ -412,10 +409,10 @@ try
         Screen('Flip', win);
 
 
-            if info.matrix(session,3) == 2
-                current_display = Screen('GetImage',win);
-                imwrite(current_display, 'cue_resp.png');
-            end
+        if info.matrix(session,3) == 2
+            current_display = Screen('GetImage',win);
+            imwrite(current_display, 'cue_resp.png');
+        end
 
 
 
@@ -504,9 +501,6 @@ try
         end
 
 
-        % if info.matrix(session,1) == 3 || info.matrix(session,1) == 4
-        %     SRT2 = 0;
-        % end
 
 
         if (session >= 1 && session <= 60) || (session >= 421 && session <= 480)
@@ -589,27 +583,46 @@ try
             ResponsePixx('StopNow', 1, [0 0 0 0 0], 0);
 
             if resp_trng == 0
-
-                session = abs(session - 60);
+                if session == 60
+                    trl.repeated_blk(1,1) = 1;
+                elseif session == 480
+                    trl.repeated_blk(1,2) = 1; 
+                end
             end
+
         end
 
         %--------------------------------------------------------------------------
 
 
-        if trl.offset_blocks(session,1) == 1
+        if trl.offset_blocks(session,1) ~= 0  
 
             if session == size(trl.onset_blocks,1)
                 txt = 'Voce completou todos os blocos da sessão. \n\n Parabéns!';
                 DrawFormattedText(win, txt, 'center', info.scr_ycenter - 250, info.black_idx);
             elseif trl.offset_blocks(session,1) == 1
 
-                txt = sprintf('Bloco %i/%i completo.\n\n Hora do descanso!', block_counter, sum(trl.onset_blocks));
+                txt = sprintf('Bloco %i/%i completo.', block_counter, sum(trl.onset_blocks));
                 txt1 = 'Pressione o botão            para continuar!';
                 txt2 = ' branco';
 
                 txt_ = '----------------------';
                 DrawFormattedText(win, txt, 'center', info.scr_ycenter, info.black_idx);
+                DrawFormattedText(win, [txt_ txt_ txt_], 'center', info.scr_ycenter +100,info.black_idx);
+                DrawFormattedText(win, txt1, 'center', info.scr_ycenter + 130, info.black_idx);
+                DrawFormattedText(win, txt2, info.scr_xcenter - 24, info.scr_ycenter + 130, [1 1 1]);
+                DrawFormattedText(win, [txt_ txt_ txt_], 'center', info.scr_ycenter + 150,info.black_idx);
+
+            elseif trl.offset_blocks(session,1) == 2
+
+                txt = sprintf('Bloco %i/%i completo.', block_counter, sum(trl.onset_blocks));
+                txt1 = 'Pressione o botão            para continuar!';
+                txt2 = ' branco';
+                txt3 = 'Hora do descanso!';
+
+                txt_ = '----------------------';
+                DrawFormattedText(win, txt, 'center', info.scr_ycenter, info.black_idx);
+                DrawFormattedText(win, txt3, 'center', info.scr_ycenter+65, color);
                 DrawFormattedText(win, [txt_ txt_ txt_], 'center', info.scr_ycenter +100,info.black_idx);
                 DrawFormattedText(win, txt1, 'center', info.scr_ycenter + 130, info.black_idx);
                 DrawFormattedText(win, txt2, info.scr_xcenter - 24, info.scr_ycenter + 130, [1 1 1]);
@@ -634,6 +647,14 @@ try
             end
 
 
+        end
+
+
+        if resp_trng == 0
+
+            session = abs(session - 60);
+
+             block_counter = block_counter - 2;
         end
 
         session = session + 1;

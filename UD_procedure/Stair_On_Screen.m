@@ -205,7 +205,7 @@ try
         end
 
 
-        for trial = 1:trl.wnoise_off(session,1)+12 % TRIAL WILL END 200 MS AFTER TARG OFF (mask off)
+        for trial = 1:trl.wnoise_off(session,1)+24 % TRIAL WILL END 300 MS AFTER TARG OFF (mask off)
 
 
             if Eyelink('NewFloatSampleAvailable') > 0
