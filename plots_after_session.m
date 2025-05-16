@@ -16,37 +16,35 @@ end
 
 
 
+
 cue_side = info.matrix(:,3);
 cue_side(info.matrix(:,1)==3 & info.matrix(:,3)==1,1) = 2;
 cue_side(info.matrix(:,1)==3 & info.matrix(:,3)==2,1) = 1;
 cue_side(info.matrix(:,1)==4 & info.matrix(:,3)==1,1) = 2;
 cue_side(info.matrix(:,1)==4 & info.matrix(:,3)==2,1) = 1;
 
-sac_side1 = zeros(840,1);
-sac_side1(cue_side(:,1)==1 & macrosacvec2(:,4) < 0,1) = 1;
-sac_side1(cue_side(:,1)==2 & macrosacvec2(:,4) > 0,1) = 1;
+sac_side = zeros(840,1);
+sac_side(cue_side(:,1)==1 & macrosacvec2(:,4) < 0,1) = 1;
+sac_side(cue_side(:,1)==2 & macrosacvec2(:,4) > 0,1) = 1;
 
-sac_side = [sac_side1(61:420,:); sac_side1(481:end,:)];
 
 % data filtered by saccade accuracy (saccade error <= 2.6)
 
-sac_acc1 = hypot(info.EccDVA - abs(macrosacvec2(:,4)), abs(macrosacvec2(:,5))) >= 0 ...
+sac_acc = hypot(info.EccDVA - abs(macrosacvec2(:,4)), abs(macrosacvec2(:,5))) >= 0 ...
     & hypot(info.EccDVA - abs(macrosacvec2(:,4)), abs(macrosacvec2(:,5))) <= 2.6;
 
-sac_acc = [sac_acc1(61:420,:); sac_acc1(481:end,:)];
 
 % data filtered by saccade latencies between 165 and 350 ms.
 
-sac_lat1 = macrosacvec2(:,1) >= 150 & macrosacvec2(:,1) <= 330;
-sac_lat = [sac_lat1(61:420,:); sac_lat1(481:end,:)];
+sac_lat = macrosacvec2(:,1) >= 170 & macrosacvec2(:,1) <= 330;
 
-sac_offset1 = macrosacvec2(:,2) >= 200;
-sac_offset = [sac_offset1(61:420,:); sac_offset1(481:end,:)];
+sac_offset = macrosacvec2(:,2) >= 200;
 
-% creacte a vector of ones (non-rejected trials) and zeros
+% create a vector of ones (non-rejected trials) and zeros
 % (rejected trials) regarding saccade latency, side and accuracy.
 
-sac = sac_lat(:,1)==1 & sac_side(:,1)==1 & sac_acc(:,1)==1 & sac_offset(:,1)==1;
+sac1 = sac_lat(:,1)==1 & sac_side(:,1)==1 & sac_acc(:,1)==1 & sac_offset(:,1)==1;
+sac = [sac1(61:420,:); sac1(481:end,:)];
 
 %%
 
@@ -54,8 +52,9 @@ sac = sac_lat(:,1)==1 & sac_side(:,1)==1 & sac_acc(:,1)==1 & sac_offset(:,1)==1;
 orientation(trl.targ_ori(:,1)==315,1) = 1; %#ok<*SAGROW>
 orientation(trl.targ_ori(:,1)==45,1) = 2;
 
-response = resp(:,5) & orientation(:,1);
+response2 = resp(:,5) & orientation(:,1);
 
+response = [response2(61:420,:); response2(481:end,:)];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 matrix = [info.matrix(61:420,:); info.matrix(481:end,:)];
@@ -65,33 +64,33 @@ value = size(matrix,1);
 
 %%
 % pre hits
-hits1 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==1 & sac(:,1)==1 & response(1:value,1) == 1,1); % val high prob
-hits2 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==2 & sac(:,1)==1 & response(1:value,1) == 1,1); % val low prob
-hits3 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==3 & sac(:,1)==1 & response(1:value,1) == 1,1); % inval high prob
-hits4 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==4 & sac(:,1)==1 & response(1:value,1) == 1,1); % inval low prob
+hits1 = resp2(1:value,1)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==1 & sac(:,1)==1 & response(1:value,1) == 1; % val high prob
+hits2 = resp2(1:value,1)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==2 & sac(:,1)==1 & response(1:value,1) == 1; % val low prob
+hits3 = resp2(1:value,1)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==3 & sac(:,1)==1 & response(1:value,1) == 1; % inval high prob
+hits4 = resp2(1:value,1)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==4 & sac(:,1)==1 & response(1:value,1) == 1; % inval low prob
 %--------------------------------------------------------------------------
 % pre FA
-fa1 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 1 & sac(:,1)==1 & response(1:value,1) == 1,2); % val high prob
-fa2 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 2 & sac(:,1)==1 & response(1:value,1) == 1,2); % val low prob
-fa3 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 3 & sac(:,1)==1 & response(1:value,1) == 1,2); % inval high prob
-fa4 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 4 & sac(:,1)==1 & response(1:value,1) == 1,2); % inval low prob
+fa1 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 1 & sac(:,1)==1; % val high prob
+fa2 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 2 & sac(:,1)==1; % val low prob
+fa3 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 3 & sac(:,1)==1; % inval high prob
+fa4 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 4 & sac(:,1)==1; % inval low prob
 fa_high =   [fa1;fa3]; % high prob
 fa_low = [fa2;fa4]; % low prob
 %--------------------------------------------------------------------------
 % pre correct rejection valid (cr1 & cr2) and invalid (cr3 & cr4)
-cr1 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 1 & sac(:,1)==1 & response(1:value,1) == 1,3);
-cr2 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 2 & sac(:,1)==1 & response(1:value,1) == 1,3);
-cr3 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 3 & sac(:,1)==1 & response(1:value,1) == 1,3);
-cr4 = resp2(matrix(1:value,4) == 1 & matrix(1:value,1) == 4 & sac(:,1)==1 & response(1:value,1) == 1,3);
+cr1 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 1 & sac(:,1)==1;
+cr2 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 2 & sac(:,1)==1;
+cr3 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 3 & sac(:,1)==1;
+cr4 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 4 & sac(:,1)==1;
 cr_high =   [cr1;cr3]; % val
 cr_low = [cr2;cr4]; % inval
 %--------------------------------------------------------------------------
 
 % pre miss
-miss1 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==1 & sac(:,1)==1 & response(1:value,1) == 1,4);
-miss2 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==2 & sac(:,1)==1 & response(1:value,1) == 1,4);
-miss3 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==3 & sac(:,1)==1 & response(1:value,1) == 1,4);
-miss4 = resp2(matrix(1:value,4) == 0 & matrix(1:value,1)==4 & sac(:,1)==1 & response(1:value,1) == 1,4);
+miss1 = resp2(1:value,4)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==1 & sac(:,1)==1;
+miss2 = resp2(1:value,4)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==2 & sac(:,1)==1;
+miss3 = resp2(1:value,4)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==3 & sac(:,1)==1;
+miss4 = resp2(1:value,4)==1 & matrix(1:value,4) == 0 & matrix(1:value,1)==4 & sac(:,1)==1;
 
 %%
 
@@ -159,7 +158,7 @@ sac_acc = [sac_acc1(61:420,:); sac_acc1(481:end,:)];
 
 % data filtered by saccade latencies between 165 and 350 ms.
 
-sac_lat1 = macrosacvec2(:,1) >= 150 & macrosacvec2(:,1) <= 330;
+sac_lat1 = macrosacvec2(:,1) >= 170 & macrosacvec2(:,1) <= 330;
 sac_lat = [sac_lat1(61:420,:); sac_lat1(481:end,:)];
 
 sac_offset1 = macrosacvec2(:,2) >= 200;
