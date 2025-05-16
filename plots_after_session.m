@@ -205,9 +205,155 @@ disp('  trials excluded (%) ');
 disp('   nocatch   catch');
 disp(total_trls);
 
+
+
+%% Saccade accuracy
+        sacvec = rmmissing([macrosacvec2(61:420,:);macrosacvec2(481:end,:)]);
+
+[ dmap, limits,fudge ] =dataDensity(rmmissing(sacvec(:,4)),rmmissing(sacvec(:,5)),1920,1080,[-26.6667/2.5 26.6667/2.5 -15/5 15/5],.005);
+%% Saccade accuracy
+
+subplot(2,4,1:2)
+
+
+cmap = colormap(slanCM('amber',30)); % flipud( % colormap(viridis);
+% cm =  imagesc(sacc_accuracy);
+set(gca, 'YDir','normal');
+[C,h] = contourf(dmap);
+h.EdgeColor = 'flat';
+
+        viscircles([(960-720) (1080/2); (960+720) (1080/2)], [(99)  (99)], 'Color', 'w','LineStyle',':','LineWidth',1.2,'EnhanceVisibility',0);
+        viscircles([(960-720) (1080/2); (960+720) (1080/2)], [(234)  (234)], 'Color', 'y','LineStyle',':','LineWidth',1.2,'EnhanceVisibility',0);
+        viscircles([(960) (1080/2)],1, 'Color', 'w','LineStyle','-','LineWidth',5,'EnhanceVisibility',0);
+
+%scatter(1920/2,1080/2,'w','.'); hold on;
+clb =   colorbar;
+clb.Units = "normalized";
+clb.Box = "off";
+clb.LineWidth = 1.2;
+clb.TickDirection = "out";
+clb.Location = "northoutside";
+hold on;
+
+ax = gca;
+set(gca,'TickDir','out');
+set(gca, 'Box', 'off','XColor','k','YColor','k','XLimitMethod','tickaligned');
+axis([0 1920 0 1080]);
+% ax.FontSize = 12;
+% ax.LineWidth = 1.2;
+% 
+% 
+ ax.XTick = [960-720 1920/2 960+720];
+ ax.YTick = [0 1080/2 1080]; % 36 px (1dva). 36px*2dva=72 px
+
+ax.XTickLabel = ["-8";"0";"8"];
+ax.YTickLabel = ["-3";"0";"3"];
+
+
+%% Saccade Reaction Times
+
+lat1 = sacvec(sacvec(:,1) <= 200,1);
+lat2 = sacvec(sacvec(:,1) >= 201 & sacvec(:,1) <= 250,1);
+lat3 = sacvec(sacvec(:,1) >= 251 & sacvec(:,1) <= 300,1);
+lat4 = sacvec(sacvec(:,1) >= 301 & sacvec(:,1) <= 350,1);
+lat5 = sacvec(sacvec(:,1) >= 351 & sacvec(:,1) <= 400,1);
+lat6 = sacvec(sacvec(:,1) >= 401,1);
+
+subplot(2,4,3)
+
+histogram(sacvec(:,1),50,'BinWidth',5,"FaceColor",[1 1 1],"FaceAlpha",1,"EdgeColor",[1 1 1],"LineWidth",1.3); hold on;
+
+% Define rectangle vertices (x and y coordinates of all 4 corners)
+% Order matters - we'll go clockwise from bottom-left
+
+x1 = [100 150 150 100];  % x-coordinates of corners
+y1 = [0 0 80 80];  % y-coordinates of corners
+x2 = [330 500 500 330];  % x-coordinates of corners
+y2 = [0 0 80 80];  % y-coordinates of corners
+% Create a blue transparent rectangle
+%patch(x, y, [205,101,0]/255,'FaceAlpha', .1,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
+patch(x1, y1, [0.5 0.5 0.5],'FaceAlpha', .2,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
+patch(x2, y2, [0.5 0.5 0.5],'FaceAlpha', .2,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
+hold on;
+
+histogram(lat1(:,1),40,'BinWidth',5,"FaceColor",[225,170,0]/255,"FaceAlpha",.5,"EdgeColor",[225,170,0]/255,"LineWidth",1.1); hold on;
+histogram(lat2(:,1),40,'BinWidth',5,"FaceColor",[205,101,0]/255,"FaceAlpha",.5,"EdgeColor",[205,101,0]/255,"LineWidth",1.1); hold on;
+histogram(lat3(:,1),40,'BinWidth',5,"FaceColor",[147,0,0]/255,"FaceAlpha",.5,"EdgeColor",[147,0,0]/255,"LineWidth",1.1); hold on;
+histogram(lat4(:,1),40,'BinWidth',5,"FaceColor",[76,38,0]/255,"FaceAlpha",.5,"EdgeColor",[76,38,0]/255,"LineWidth",1.1); hold on;
+histogram(lat5(:,1),40,'BinWidth',5,"FaceColor",[0,0,0]/255,"FaceAlpha",.5,"EdgeColor",[0,0,0]/255,"LineWidth",1.1); hold on;
+histogram(lat6(:,1),40,'BinWidth',5,"FaceColor",[0 0 0]/255,"FaceAlpha",.8,"EdgeColor",[0 0 0]/255,"LineWidth",1.1); hold on;
+
+xlabel('SRT (ms)','FontSize',8);
+ylabel('Nº of Trials','FontSize',8);
+
+    set(gca,'TickDir','out');
+    set(gca, 'Box', 'off');
+    ax = gca;
+    ax.FontSize = 8;
+    ax.LineWidth = 1.2;
+    ax.XLim = [100 500];
+    ax.YLim = [0 70];
+
+    x = xline(median(sacvec(:,1)),':'); hold on;
+    x.LineWidth = 2;
+    x.Color = [0 0 0];
+
+%% Targ offset - Sacc onset
+
+lat1 = sacvec(sacvec(:,1) <= 200,1);
+lat2 = sacvec(sacvec(:,1) >= 201 & sacvec(:,1) <= 250,1);
+lat3 = sacvec(sacvec(:,1) >= 251 & sacvec(:,1) <= 300,1);
+lat4 = sacvec(sacvec(:,1) >= 301 & sacvec(:,1) <= 350,1);
+lat5 = sacvec(sacvec(:,1) >= 351 & sacvec(:,1) <= 400,1);
+lat6 = sacvec(sacvec(:,1) >= 401,1);
+
+lat1 = 190-lat1;
+lat2 = 190-lat2;
+lat3 = 190-lat3;
+lat4 = 190-lat4;
+lat5 = 190-lat5;
+lat6 = 190-lat6;
+
+subplot(2,4,4)
+
+histogram(sacvec(:,1),50,'BinWidth',5,"FaceColor",[1 1 1],"FaceAlpha",1,"EdgeColor",[1 1 1],"LineWidth",1.3); hold on;
+
+% Define rectangle vertices (x and y coordinates of all 4 corners)
+% Order matters - we'll go clockwise from bottom-left
+x1 = [-100 0 0 -100];  % x-coordinates of corners
+y1 = [0 0 70 70];  % y-coordinates of corners
+
+% Create a blue transparent rectangle
+%patch(x, y, [205,101,0]/255,'FaceAlpha', .1,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
+patch(x1, y1, [205,101,0]/255,'FaceAlpha', .2,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
+hold on;
+
+histogram(lat1(:,1),40,'BinWidth',5,"FaceColor",[225,170,0]/255,"FaceAlpha",.5,"EdgeColor",[225,170,0]/255,"LineWidth",1.1); hold on;
+histogram(lat2(:,1),40,'BinWidth',5,"FaceColor",[205,101,0]/255,"FaceAlpha",.5,"EdgeColor",[205,101,0]/255,"LineWidth",1.1); hold on;
+histogram(lat3(:,1),40,'BinWidth',5,"FaceColor",[147,0,0]/255,"FaceAlpha",.5,"EdgeColor",[147,0,0]/255,"LineWidth",1.1); hold on;
+histogram(lat4(:,1),40,'BinWidth',5,"FaceColor",[76,38,0]/255,"FaceAlpha",.5,"EdgeColor",[76,38,0]/255,"LineWidth",1.1); hold on;
+histogram(lat5(:,1),40,'BinWidth',5,"FaceColor",[0,0,0]/255,"FaceAlpha",.5,"EdgeColor",[0,0,0]/255,"LineWidth",1.1); hold on;
+histogram(lat6(:,1),40,'BinWidth',5,"FaceColor",[0 0 0]/255,"FaceAlpha",.8,"EdgeColor",[0 0 0]/255,"LineWidth",1.1); hold on;
+
+xlabel('Targ offset - Sacc onset','FontSize',8);
+ylabel('Nº of Trials','FontSize',8);
+
+    set(gca,'TickDir','out');
+    set(gca, 'Box', 'off');
+    ax = gca;
+    ax.FontSize = 8;
+    ax.LineWidth = 1.2;
+    ax.XLim = [-200 300];
+    ax.YLim = [0 70];
+
+    x = xline(0,':'); hold on;
+    x.LineWidth = 2;
+    x.Color = [0 0 0];
+
+
 %% Plots for hits and FAs
 
-subplot(2,3,4)
+subplot(2,4,5)
 plot = bar([1 2],[SDM(1:2,1)';SDM(3:4,1)']*100,...
     FaceColor="none",LineWidth=1.5,BarWidth=.4);
 plot(1).EdgeColor = [205,101,0]/255;
@@ -248,9 +394,9 @@ hold on;
 legend('boxoff');
 title(leg,'Feature Probability');
 
-%%
+%% ensitivity (d) for both saccade congrency and feature probability
 
-subplot(2,3,5)
+subplot(2,4,6)
 
 plot3 = bar([1 2],[SDM(1:2,3)';SDM(3:4,3)'],LineWidth=1.5,BarWidth=.4);
 plot3(1).EdgeColor = [205,101,0]/255;
@@ -280,141 +426,44 @@ legend('boxoff');
 title(leg,'Feature Probability');
 
 %%
-        sacvec = rmmissing([macrosacvec2(61:420,:);macrosacvec2(481:end,:)]);
 
-[ dmap, limits,fudge ] =dataDensity(rmmissing(sacvec(:,4)),rmmissing(sacvec(:,5)),1920,1080,[-26.6667/2.5 26.6667/2.5 -15/5 15/5],.005);
-%%
-subplot(2,3,1:2)
+subplot(2,4,7)
 
+plot3 = bar([mean(SDM(1:2,3))';mean(SDM(3:4,3))'],LineWidth=1.5,BarWidth=.4);
+plot3.EdgeColor = [205,101,0]/255;
+plot3.FaceColor = [205,101,0]/255;
 
-cmap = colormap(slanCM('amber',30)); % flipud( % colormap(viridis);
-% cm =  imagesc(sacc_accuracy);
-set(gca, 'YDir','normal');
-[C,h] = contourf(dmap);
-h.EdgeColor = 'flat';
+name={'Congruent';'Incongruent'};
+set(gca,'xticklabel',name,'FontWeight','normal');
+ylabel('Sensitivity (d)','FontWeight', 'bold','FontSize',8);
+xlabel('Saccadic Cue','FontWeight','bold','FontSize',8);
 
-        viscircles([(960-720) (1080/2); (960+720) (1080/2)], [(99)  (99)], 'Color', 'w','LineStyle',':','LineWidth',1.2,'EnhanceVisibility',0);
-        viscircles([(960-720) (1080/2); (960+720) (1080/2)], [(234)  (234)], 'Color', 'y','LineStyle',':','LineWidth',1.2,'EnhanceVisibility',0);
-        viscircles([(960) (1080/2)],1, 'Color', 'w','LineStyle','-','LineWidth',5,'EnhanceVisibility',0);
-
-%scatter(1920/2,1080/2,'w','.'); hold on;
-clb =   colorbar;
-clb.Units = "normalized";
-clb.Box = "off";
-clb.LineWidth = 1.2;
-clb.TickDirection = "out";
-clb.Location = "northoutside";
-hold on;
-
+hold on
 ax = gca;
+ax.LineWidth = 1.2;
+ax.FontSize = 8;
 set(gca,'TickDir','out');
-set(gca, 'Box', 'off','XColor','k','YColor','k','XLimitMethod','tickaligned');
-axis([0 1920 0 1080]);
-% ax.FontSize = 12;
-% ax.LineWidth = 1.2;
-% 
-% 
- ax.XTick = [960-720 1920/2 960+720];
- ax.YTick = [0 1080/2 1080]; % 36 px (1dva). 36px*2dva=72 px
+set(gca, 'Box', 'off');
+ ax.YLim = [0 3];
 
-ax.XTickLabel = ["-8";"0";"8"];
-ax.YTickLabel = ["-3";"0";"3"];
-%%
-
-lat1 = sacvec(sacvec(:,1) <= 200,1);
-lat2 = sacvec(sacvec(:,1) >= 201 & sacvec(:,1) <= 250,1);
-lat3 = sacvec(sacvec(:,1) >= 251 & sacvec(:,1) <= 300,1);
-lat4 = sacvec(sacvec(:,1) >= 301 & sacvec(:,1) <= 350,1);
-lat5 = sacvec(sacvec(:,1) >= 351 & sacvec(:,1) <= 400,1);
-lat6 = sacvec(sacvec(:,1) >= 401,1);
-
-subplot(2,3,3)
-
-histogram(sacvec(:,1),50,'BinWidth',5,"FaceColor",[1 1 1],"FaceAlpha",1,"EdgeColor",[1 1 1],"LineWidth",1.3); hold on;
-
-% Define rectangle vertices (x and y coordinates of all 4 corners)
-% Order matters - we'll go clockwise from bottom-left
-
-x1 = [100 150 150 100];  % x-coordinates of corners
-y1 = [0 0 80 80];  % y-coordinates of corners
-x2 = [330 500 500 330];  % x-coordinates of corners
-y2 = [0 0 80 80];  % y-coordinates of corners
-% Create a blue transparent rectangle
-%patch(x, y, [205,101,0]/255,'FaceAlpha', .1,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
-patch(x1, y1, [0.5 0.5 0.5],'FaceAlpha', .2,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
-patch(x2, y2, [0.5 0.5 0.5],'FaceAlpha', .2,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
-hold on;
-
-histogram(lat1(:,1),40,'BinWidth',5,"FaceColor",[225,170,0]/255,"FaceAlpha",.5,"EdgeColor",[225,170,0]/255,"LineWidth",1.1); hold on;
-histogram(lat2(:,1),40,'BinWidth',5,"FaceColor",[205,101,0]/255,"FaceAlpha",.5,"EdgeColor",[205,101,0]/255,"LineWidth",1.1); hold on;
-histogram(lat3(:,1),40,'BinWidth',5,"FaceColor",[147,0,0]/255,"FaceAlpha",.5,"EdgeColor",[147,0,0]/255,"LineWidth",1.1); hold on;
-histogram(lat4(:,1),40,'BinWidth',5,"FaceColor",[76,38,0]/255,"FaceAlpha",.5,"EdgeColor",[76,38,0]/255,"LineWidth",1.1); hold on;
-histogram(lat5(:,1),40,'BinWidth',5,"FaceColor",[0,0,0]/255,"FaceAlpha",.5,"EdgeColor",[0,0,0]/255,"LineWidth",1.1); hold on;
-histogram(lat6(:,1),40,'BinWidth',5,"FaceColor",[0 0 0]/255,"FaceAlpha",.8,"EdgeColor",[0 0 0]/255,"LineWidth",1.1); hold on;
-
-xlabel('SRT (ms)','FontSize',8);
-ylabel('Nº of Trials','FontSize',8);
-
-    set(gca,'TickDir','out');
-    set(gca, 'Box', 'off');
-    ax = gca;
-    ax.FontSize = 8;
-    ax.LineWidth = 1.2;
-    ax.XLim = [100 500];
-    ax.YLim = [0 70];
-
-    x = xline(median(sacvec(:,1)),':'); hold on;
-    x.LineWidth = 2;
-    x.Color = [0 0 0];
 
 %%
 
-lat1 = sacvec(sacvec(:,1) <= 200,1);
-lat2 = sacvec(sacvec(:,1) >= 201 & sacvec(:,1) <= 250,1);
-lat3 = sacvec(sacvec(:,1) >= 251 & sacvec(:,1) <= 300,1);
-lat4 = sacvec(sacvec(:,1) >= 301 & sacvec(:,1) <= 350,1);
-lat5 = sacvec(sacvec(:,1) >= 351 & sacvec(:,1) <= 400,1);
-lat6 = sacvec(sacvec(:,1) >= 401,1);
+subplot(2,4,8)
 
-lat1 = 190-lat1;
-lat2 = 190-lat2;
-lat3 = 190-lat3;
-lat4 = 190-lat4;
-lat5 = 190-lat5;
-lat6 = 190-lat6;
+plot3 = bar([mean([SDM(1,3) SDM(3,3)])';mean([SDM(2,3) SDM(4,3)])'],LineWidth=1.5,BarWidth=.4);
+plot3.EdgeColor = [205,101,0]/255;
+plot3.FaceColor = [205,101,0]/255;
 
-subplot(2,3,6)
+name={'High';'Low'};
+set(gca,'xticklabel',name,'FontWeight','normal');
+ylabel('Sensitivity (d)','FontWeight', 'bold','FontSize',8);
+xlabel('Feature probability','FontWeight','bold','FontSize',8);
 
-histogram(sacvec(:,1),50,'BinWidth',5,"FaceColor",[1 1 1],"FaceAlpha",1,"EdgeColor",[1 1 1],"LineWidth",1.3); hold on;
-
-% Define rectangle vertices (x and y coordinates of all 4 corners)
-% Order matters - we'll go clockwise from bottom-left
-x1 = [-100 0 0 -100];  % x-coordinates of corners
-y1 = [0 0 70 70];  % y-coordinates of corners
-
-% Create a blue transparent rectangle
-%patch(x, y, [205,101,0]/255,'FaceAlpha', .1,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
-patch(x1, y1, [205,101,0]/255,'FaceAlpha', .2,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
-hold on;
-
-histogram(lat1(:,1),40,'BinWidth',5,"FaceColor",[225,170,0]/255,"FaceAlpha",.5,"EdgeColor",[225,170,0]/255,"LineWidth",1.1); hold on;
-histogram(lat2(:,1),40,'BinWidth',5,"FaceColor",[205,101,0]/255,"FaceAlpha",.5,"EdgeColor",[205,101,0]/255,"LineWidth",1.1); hold on;
-histogram(lat3(:,1),40,'BinWidth',5,"FaceColor",[147,0,0]/255,"FaceAlpha",.5,"EdgeColor",[147,0,0]/255,"LineWidth",1.1); hold on;
-histogram(lat4(:,1),40,'BinWidth',5,"FaceColor",[76,38,0]/255,"FaceAlpha",.5,"EdgeColor",[76,38,0]/255,"LineWidth",1.1); hold on;
-histogram(lat5(:,1),40,'BinWidth',5,"FaceColor",[0,0,0]/255,"FaceAlpha",.5,"EdgeColor",[0,0,0]/255,"LineWidth",1.1); hold on;
-histogram(lat6(:,1),40,'BinWidth',5,"FaceColor",[0 0 0]/255,"FaceAlpha",.8,"EdgeColor",[0 0 0]/255,"LineWidth",1.1); hold on;
-
-xlabel('Targ offset - Sacc onset','FontSize',8);
-ylabel('Nº of Trials','FontSize',8);
-
-    set(gca,'TickDir','out');
-    set(gca, 'Box', 'off');
-    ax = gca;
-    ax.FontSize = 8;
-    ax.LineWidth = 1.2;
-    ax.XLim = [-200 300];
-    ax.YLim = [0 70];
-
-    x = xline(0,':'); hold on;
-    x.LineWidth = 2;
-    x.Color = [0 0 0];
+hold on
+ax = gca;
+ax.LineWidth = 1.2;
+ax.FontSize = 8;
+set(gca,'TickDir','out');
+set(gca, 'Box', 'off');
+ ax.YLim = [0 3];

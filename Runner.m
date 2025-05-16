@@ -43,7 +43,7 @@ end
 
 %% Run experiment
 
-[srt,resp,time] = On_Screen(info,trl,sub,gabor,mask);
+[srt,resp,time,trl] = On_Screen(info,trl,sub,gabor,mask);
 
 %%
 

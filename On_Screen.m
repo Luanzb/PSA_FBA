@@ -1,4 +1,4 @@
-function [srt,resp,time] = On_Screen(info,trl,sub,gabor,mask)
+function [srt,resp,time,trl] = On_Screen(info,trl,sub,gabor,mask)
 % First column  = Hits;
 % Second column = False Alarms
 % Third column  =  Correct rejections
@@ -105,7 +105,6 @@ fix_win_center = [-info.roi_fix_pix -info.roi_fix_pix info.roi_fix_pix info.roi_
 fix_win_center = CenterRect(fix_win_center, info.scr_rect);
 
 %%
-trl.repeated_blk = zeros(1,2);
 
 block_counter = 0;
 
@@ -372,12 +371,12 @@ try
             end
 
 
-            if trial == trl.wnoise_on(session,1)
-                if info.matrix(session,3) == 2
-                    current_display = Screen('GetImage',win);
-                    imwrite(current_display, 'wnoise.png');
-                end
-            end
+            % if trial == trl.wnoise_on(session,1)
+            %     if info.matrix(session,3) == 2
+            %         current_display = Screen('GetImage',win);
+            %         imwrite(current_display, 'wnoise.png');
+            %     end
+            % end
 
 
             if trial >= trl.cue_on(session,1)
@@ -409,10 +408,10 @@ try
         Screen('Flip', win);
 
 
-        if info.matrix(session,3) == 2
-            current_display = Screen('GetImage',win);
-            imwrite(current_display, 'cue_resp.png');
-        end
+        % if info.matrix(session,3) == 2
+        %     current_display = Screen('GetImage',win);
+        %     imwrite(current_display, 'cue_resp.png');
+        % end
 
 
 
