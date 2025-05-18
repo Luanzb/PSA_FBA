@@ -2,6 +2,8 @@
 denplot = '/home/kaneda/Documents/Data density plot/';
 addpath(genpath(denplot));
 
+sacc_off = 300;
+sacc_on = 170;
 %%
 
 if trl.repeated_blk(1,1) == 0 && trl.repeated_blk(1,2) == 0  
@@ -13,7 +15,6 @@ elseif trl.repeated_blk (1,1) == 0 && trl.repeated_blk (1,2) == 1
 elseif trl.repeated_blk (1,1) == 1 && trl.repeated_blk (1,2) == 1
     macrosacvec2 = [s.macrosacvec(61:420,:); s.macrosacvec(481:end,:)];    
 end
-
 
 
 
@@ -36,7 +37,7 @@ sac_acc = hypot(info.EccDVA - abs(macrosacvec2(:,4)), abs(macrosacvec2(:,5))) >=
 
 % data filtered by saccade latencies between 165 and 350 ms.
 
-sac_lat = macrosacvec2(:,1) >= 170 & macrosacvec2(:,1) <= 330;
+sac_lat = macrosacvec2(:,1) >= sacc_on & macrosacvec2(:,1) <= sacc_off;
 
 sac_offset = macrosacvec2(:,2) >= 200;
 
@@ -158,7 +159,7 @@ sac_acc = [sac_acc1(61:420,:); sac_acc1(481:end,:)];
 
 % data filtered by saccade latencies between 165 and 350 ms.
 
-sac_lat1 = macrosacvec2(:,1) >= 170 & macrosacvec2(:,1) <= 330;
+sac_lat1 = macrosacvec2(:,1) >= sacc_on & macrosacvec2(:,1) <= sacc_off;
 sac_lat = [sac_lat1(61:420,:); sac_lat1(481:end,:)];
 
 sac_offset1 = macrosacvec2(:,2) >= 200;
@@ -265,9 +266,9 @@ histogram(sacvec(:,1),50,'BinWidth',5,"FaceColor",[1 1 1],"FaceAlpha",1,"EdgeCol
 % Define rectangle vertices (x and y coordinates of all 4 corners)
 % Order matters - we'll go clockwise from bottom-left
 
-x1 = [100 150 150 100];  % x-coordinates of corners
+x1 = [100 sacc_on sacc_on 100];  % x-coordinates of corners
 y1 = [0 0 80 80];  % y-coordinates of corners
-x2 = [330 500 500 330];  % x-coordinates of corners
+x2 = [290 500 500 290];  % x-coordinates of corners
 y2 = [0 0 80 80];  % y-coordinates of corners
 % Create a blue transparent rectangle
 %patch(x, y, [205,101,0]/255,'FaceAlpha', .1,'EdgeColor', 'none','LineWidth', 1,'LineStyle', '--'); 
