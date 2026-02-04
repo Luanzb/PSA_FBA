@@ -1,0 +1,107 @@
+
+srt = zeros(800,1);
+
+srt(:,1) = s.macrosacvec(:,1)>= 140 & s.macrosacvec(:,1)<=400;
+
+matrix = table2array(trls_table);
+
+sac1 = s.macrosacvec(matrix(:,3) == 0 & srt(:,1) == 1, 4:5);
+sac2 = s.macrosacvec(matrix(:,3) == 45 & srt(:,1) == 1, 4:5);
+sac3 = s.macrosacvec(matrix(:,3) == 90 & srt(:,1) == 1, 4:5);
+sac4 = s.macrosacvec(matrix(:,3) == 135 & srt(:,1) == 1, 4:5);
+
+
+%%
+
+% Create figure
+figure;
+
+for f = 1:4
+
+    subplot(2,2,f)
+    hold on;
+    axis equal;
+    grid on;
+
+
+    % Set plot limits (adjust based on your data range)
+    xlim([-12 12]);
+    ylim([-8 8]);
+
+    % Plot center point (0,0)
+    plot(0, 0, 'k+', 'MarkerSize', 10, 'LineWidth', 2);
+
+    % Plot the vertical bar stimulus
+    bar_distance = 8; % 8 dva from center
+    bar_length = 3;   % 3 dva length
+    bar_width = 0.3;  % 0.3 dva width
+
+
+    % Define the unrotated rectangle vertices (centered at [bar_distance, 0])
+x_unrotated = bar_distance + [-bar_width/2, -bar_width/2, bar_width/2, bar_width/2];
+y_unrotated = [ -bar_length/2, bar_length/2, bar_length/2, -bar_length/2];
+
+% Rotation matrix (45° clockwise)
+if f == 3 || f == 4
+if f == 3
+    theta2 = deg2rad(-45); % Negative for clockwise rotation
+elseif f == 4
+    theta2 = deg2rad(45); 
+end
+R = [cos(theta2), -sin(theta2); sin(theta2), cos(theta2)];
+else
+    R = [1 0; 0 1];
+end
+
+% Rotate vertices
+rotated_vertices = R * [x_unrotated - bar_distance; y_unrotated];
+x_rotated = rotated_vertices(1,:) + bar_distance;
+y_rotated = rotated_vertices(2,:);
+
+
+
+    % Coordinates for the rectangle [x y w h]
+    % x = bar_distance - bar_width/2 (centered)
+    % y = -bar_length/2 (centered vertically)
+    if f == 1
+        rectangle('Position', [bar_distance-bar_width/2, -bar_length/2, bar_width, bar_length], ...
+        'FaceColor', [0 0 0], 'EdgeColor', 'k', 'LineWidth', 1.5);
+    elseif f == 2
+         rectangle('Position', [bar_distance - bar_length/2, -bar_width/2, bar_length, bar_width], ...
+          'FaceColor', [0 0 0], 'EdgeColor', 'k', 'LineWidth', 1.5);
+    elseif f == 3
+        % Plot the rotated bar
+        patch(x_rotated, y_rotated, [0 0 0], 'EdgeColor', 'k', 'LineWidth', 1.5);
+    else
+        % Plot the rotated bar
+        patch(x_rotated, y_rotated, [0 0 0], 'EdgeColor', 'k', 'LineWidth', 1.5);
+    end
+
+
+    if f == 1
+        x_saccade = sac3(:,1); % clustered around the bar
+        y_saccade = sac3(:,2); % scattered vertically
+    elseif f == 2
+        x_saccade = sac1(:,1); % clustered around the bar
+        y_saccade = sac1(:,2); % scattered vertically
+    elseif f == 3
+        x_saccade = sac2(:,1); % clustered around the bar
+        y_saccade = sac2(:,2); % scattered vertically
+    else
+        x_saccade = sac4(:,1); % clustered around the bar
+        y_saccade = sac4(:,2); % scattered vertically
+    end
+
+    scatter(x_saccade, y_saccade, 15, 'b', 'filled', 'MarkerFaceAlpha', 0.7);
+
+    % Label axes and add title
+    xlabel('Horizontal Position (dva)');
+    ylabel('Vertical Position (dva)');
+
+
+    % Add reference lines
+    hline = refline(0, 0); hline.Color = 'k';
+    vline = line([0 0], ylim); vline.Color = 'k';
+
+    hold off;
+end

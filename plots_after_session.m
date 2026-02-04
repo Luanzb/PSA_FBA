@@ -75,16 +75,16 @@ fa1 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 1 & sa
 fa2 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 2 & sac(:,1)==1; % val low prob
 fa3 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 3 & sac(:,1)==1; % inval high prob
 fa4 = resp2(1:value,2)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 4 & sac(:,1)==1; % inval low prob
-fa_high =   [fa1;fa3]; % high prob
-fa_low = [fa2;fa4]; % low prob
+fa_high =   [fa1;fa2]; % high prob
+fa_low = [fa3;fa4]; % low prob
 %--------------------------------------------------------------------------
 % pre correct rejection valid (cr1 & cr2) and invalid (cr3 & cr4)
 cr1 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 1 & sac(:,1)==1;
 cr2 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 2 & sac(:,1)==1;
 cr3 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 3 & sac(:,1)==1;
 cr4 = resp2(1:value,3)==1 & matrix(1:value,4) == 1 & matrix(1:value,1) == 4 & sac(:,1)==1;
-cr_high =   [cr1;cr3]; % val
-cr_low = [cr2;cr4]; % inval
+cr_high =   [cr1;cr2]; % val
+cr_low = [cr3;cr4]; % inval
 %--------------------------------------------------------------------------
 
 % pre miss
@@ -120,7 +120,7 @@ if fa_low == 0; fa_low = .25; end
 pal_path = '/home/kaneda/Documents/Palamedes1_11_11/Palamedes';
 addpath(genpath(pal_path));
 
-pHF = [hits11 fa_high;hits22 fa_low; hits33 fa_high; hits44 fa_low];
+pHF = [hits11 fa_high;hits22 fa_high; hits33 fa_low; hits44 fa_low];
 
 
 [dP, C, lnB, pC]=PAL_SDT_1AFC_PHFtoDP(pHF);
@@ -418,7 +418,7 @@ ax.LineWidth = 1.2;
 ax.FontSize = 8;
 set(gca,'TickDir','out');
 set(gca, 'Box', 'off');
- ax.YLim = [0 3];
+ ax.YLim = [0 3.5];
 
 leg = legend(plot3, {'High';'Low';},'Location','northeast','FontSize', 6);
 hold on;
@@ -444,7 +444,7 @@ ax.LineWidth = 1.2;
 ax.FontSize = 8;
 set(gca,'TickDir','out');
 set(gca, 'Box', 'off');
- ax.YLim = [0 3];
+ ax.YLim = [0 3.5];
 
 
 %%
@@ -466,4 +466,4 @@ ax.LineWidth = 1.2;
 ax.FontSize = 8;
 set(gca,'TickDir','out');
 set(gca, 'Box', 'off');
- ax.YLim = [0 3];
+ ax.YLim = [0 3.5];

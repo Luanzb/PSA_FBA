@@ -115,7 +115,11 @@ try
     abort = false;
 
 
+    % movieName = 'trial_recording_fast.mp4';
+    % moviePtr = Screen('CreateMovie', win, movieName, [], [], 120);
+
     while session <= info.ntrials % 1:info.ntrials
+
 
         % Cria gabor patch com contrast especifico
         gabor.contrast = sub.targ;
@@ -389,6 +393,9 @@ try
             end
 
 
+            % % Add frame to movie
+            % Screen('AddFrameToMovie', win);
+
         end
 
         % DRAW FIXATION POINT AND PLACEHOLDERS
@@ -406,6 +413,11 @@ try
 
 
         Screen('Flip', win);
+        
+            %         % Add frame to movie
+            % Screen('AddFrameToMovie', win);
+
+    
 
 
         % if info.matrix(session,3) == 2
@@ -531,6 +543,9 @@ try
             Screen('DrawDots',win,info.pholdercoordR,info.dot_size_pix,info.black_idx,[],2,1);
             Screen('Flip', win); WaitSecs(0.2);
 
+            %                     % Add frame to movie
+            % Screen('AddFrameToMovie', win);
+
         end
 
 
@@ -552,12 +567,13 @@ try
 
 
 
+            % Screen('FinalizeMovie', moviePtr);
         %--------------------------------------------------------------------------
 
         if session == 60 || session == 480
 
             txt6 = 'Deseja realizar o treino novamente? \n\n (Sim - verde / Não - Vermelho)';
-            DrawFormattedText(win, txt6, 'center', info.scr_ycenter - 250, info.black_idx);
+            DrawFormattedText(win, txt6, 'center', info.scr_ycenter - 250, info.white_idx);
             Screen('Flip', win);
 
 
